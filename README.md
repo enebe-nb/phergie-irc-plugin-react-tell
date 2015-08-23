@@ -20,14 +20,30 @@ See [Phergie documentation](https://github.com/phergie/phergie-irc-bot-react/wik
 
 ## Configuration
 
-[TODO] Document configuration
-
 ```php
 return array(
     'plugins' => array(
+        new \EnebeNb\Phergie\Plugin\Tell\Plugin(array(
+            // Send a \PDO object to use that database,
+            // or leave unsetted to store the messages into an array.
+            'database' => new \PDO($mydsn, $myusername, $mypassword),
+
+            // change the default command text from 'tell' to anything
+            'custom-commands' => 'mycustomcommand',
+            // or pick any number of commands
+            'custom-commands' => array('tell', 'ask', 'remind'),
+            // also works with comma-delimited strings
+            'custom-commands' => 'tell,ask,remind',
+        )),
+
+        // phergie/phergie-irc-plugin-react-command
+        // is required to listen for commands
+        new \Phergie\Irc\Plugin\React\Command\Plugin(),
     ),
 );
 ```
+
+See [phergie/phergie-irc-plugin-react-command](https://github.com/phergie/phergie-irc-plugin-react-command) for more information on Command Plugin.
 
 ## Tests
 
