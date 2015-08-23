@@ -46,8 +46,12 @@ class PluginTest extends \PHPUnit_Framework_TestCase
         if (isset($GLOBALS['dburi'])) {
             self::$database = new \PDO(
                 $GLOBALS['dburi'],
-                $GLOBALS['dbuser'],
-                $GLOBALS['dbpass']);
+                isset($GLOBALS['dbuser']) ? $GLOBALS['dbuser'] : null,
+                isset($GLOBALS['dbpass']) ? $GLOBALS['dbpass'] : null,
+                array(\PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION));
+
+            // Set Session variables
+            new Plugin(array('database' => self::$database));
 
             Db\PdoWrapper::create(self::$database);
         }
@@ -59,7 +63,7 @@ class PluginTest extends \PHPUnit_Framework_TestCase
     protected function setUp()
     {
         if (isset(self::$database)) {
-            self::$database->exec('TRUNCATE TABLE `phergie-plugin-tell`');
+            self::$database->exec('DELETE FROM "phergie-plugin-tell";');
         }
     }
 

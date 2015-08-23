@@ -119,7 +119,9 @@ class Plugin extends AbstractPlugin
             $messages = $this->database->retrieveMessages($event->getNick());
             foreach($messages as $row) {
                 $message = sprintf('(%s) %s: %s',
-                    date('m/d h:ia', $row['timestamp']), $row['sender'], $row['message']);
+                    (new \DateTime($row['timestamp']))->format('m/d h:ia'),
+                    $row['sender'],
+                    $row['message']);
                 $queue->ircNotice($event->getNick(), $message);
             }
         }

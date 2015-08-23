@@ -28,6 +28,14 @@ class PdoWrapper implements WrapperInterface
     public function __construct(\PDO $connection)
     {
         $this->connection = $connection;
+        switch ($connection->getAttribute(\PDO::ATTR_DRIVER_NAME)) {
+            case 'mysql':
+                $connection->exec('SET SESSION SQL_MODE=ANSI_QUOTES;');
+                break;
+            case 'sqlsrv':
+                $connection->exec('SET QUOTED_IDENTIFIER ON;');
+                break;
+        }
     }
 
     /**
@@ -38,11 +46,11 @@ class PdoWrapper implements WrapperInterface
     public static function create(\PDO $connection)
     {
         return $connection->exec(
-            'CREATE TABLE IF NOT EXISTS `phergie-plugin-tell` (
-                `timestamp` TIMESTAMP DEFAULT NOW(),
-                `sender` VARCHAR(30) NOT NULL,
-                `recipient` VARCHAR(30) NOT NULL,
-                `message` VARCHAR(510) NOT NULL
+            'CREATE TABLE IF NOT EXISTS "phergie-plugin-tell" (
+                "timestamp" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                "sender" VARCHAR(30) NOT NULL,
+                "recipient" VARCHAR(30) NOT NULL,
+                "message" VARCHAR(510) NOT NULL
             );'
         );
     }
@@ -56,17 +64,17 @@ class PdoWrapper implements WrapperInterface
     public function retrieveMessages($recipient)
     {
         $statement = $this->connection->prepare(
-            'SELECT UNIX_TIMESTAMP(`timestamp`) AS `timestamp`, `sender`, `message`
-                FROM `phergie-plugin-tell`
-                WHERE `recipient` = ?;'
+            'SELECT "timestamp", "sender", "message"
+                FROM "phergie-plugin-tell"
+                WHERE "recipient" = ?;'
         );
 
         if ($statement->execute(array($recipient))) {
             $messages = $statement->fetchAll(\PDO::FETCH_ASSOC);
 
             $this->connection->prepare(
-                'DELETE FROM `phergie-plugin-tell`
-                    WHERE `recipient` = ?;'
+                'DELETE FROM "phergie-plugin-tell"
+                    WHERE "recipient" = ?;'
             )->execute(array($recipient));
 
             // [NOTE] Maybe return statement (for iteration)
@@ -87,9 +95,9 @@ class PdoWrapper implements WrapperInterface
     public function postMessage($sender, $recipient, $message)
     {
         return $this->connection->prepare(
-            'INSERT INTO `phergie-plugin-tell`
-                (`sender`, `recipient`, `message`)
-                VALUES (?, ?, ?)'
+            'INSERT INTO "phergie-plugin-tell"
+                ("sender", "recipient", "message")
+                VALUES (?, ?, ?);'
         )->execute(array($sender, $recipient, $message));
     }
 }

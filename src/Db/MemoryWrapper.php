@@ -53,7 +53,7 @@ class MemoryWrapper implements WrapperInterface
         }
 
         $this->database[$recipient][] = array(
-            'timestamp' => time(),
+            'timestamp' => date('Y-m-d H:i:s'),
             'sender' => $sender,
             'message' => $message,
         );
