@@ -2,7 +2,6 @@ language: php
 
 php:
   - 5.4
-  - 5.5
   - 5.6
   - hhvm
 
@@ -11,6 +10,12 @@ env:
   - DB=mysql
   - DB=psql
   - DB=sqlite
+
+matrix:
+  exclude:
+    # postgre is unsupported on hhvm
+    - php: hhvm
+      env: DB=psql
 
 before_script:
   - composer self-update
