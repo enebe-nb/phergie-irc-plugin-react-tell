@@ -45,6 +45,13 @@ return array(
 
 See [phergie/phergie-irc-plugin-react-command](https://github.com/phergie/phergie-irc-plugin-react-command) for more information on Command Plugin.
 
+## Databases
+
+This plugin is tested on following databases:
+- MySQL (it sets SQL_MODE to ANSI_QUOTES on construct)
+- PostgreSQL
+- SQLITE
+
 ## Tests
 
 To run the unit test suite:
