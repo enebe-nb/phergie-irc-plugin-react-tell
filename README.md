@@ -37,6 +37,9 @@ return array(
 
             // create database table
             'create-database' => true,
+
+            // reply received commands with a custom message
+            'success-message' => 'Gotcha!',
         )),
 
         // phergie/phergie-irc-plugin-react-command

@@ -182,6 +182,7 @@ class PluginTest extends \PHPUnit_Framework_TestCase
             $commandEvent = $this->getMockCommandEvent('tell',
                 'myrecipient '.$message['content'], $message['sender']);
             $plugin->handleCommand($commandEvent, $queue);
+            Phake::verify($queue)->ircNotice($message['sender'], $this->anything());
         }
 
         $connection = $this->getMockConnection('mynickname');
@@ -210,13 +211,14 @@ class PluginTest extends \PHPUnit_Framework_TestCase
             $commandEvent = $this->getMockCommandEvent('tell',
                 'myrecipient '.$message['content'], $message['sender']);
             $plugin->handleCommand($commandEvent, $queue);
+            Phake::verify($queue)->ircNotice($message['sender'], $this->anything());
         }
 
         $connection = $this->getMockConnection('mynickname');
         $userEvent = $this->getMockUserEvent('anotheruser', $connection);
         $plugin->deliverMessage($userEvent, $queue);
 
-        Phake::verifyNoInteraction($queue);
+        Phake::verifyNoOtherInteractions($queue);
     }
 
     /**

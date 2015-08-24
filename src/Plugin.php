@@ -33,6 +33,13 @@ class Plugin extends AbstractPlugin
         );
 
     /**
+     * Message to be send when a command is accepted.
+     *
+     * @var string
+     */
+    protected $successMessage = 'Ok. I\'ll tell him.';
+
+    /**
      * Database layer interface
      *
      * @var \EnebeNb\Phergie\Plugin\Tell\Db\WrapperInterface
@@ -53,10 +60,13 @@ class Plugin extends AbstractPlugin
      * create-database - optional, call tables creation method on database.
      * Default: false
      *
+     * success-message - optional, message to be send after storing a message.
+     * Default: 'Ok. I\'ll tell him.'
+     *
      * [TODO] deliver on bot join
      * [TODO] max notes (avoid spam)
      * [TODO] message/date format
-     * [TODO] success/failure messages
+     * [TODO] failure message
      *
      * [NOTE] There's many concepts to add yet.
      *
@@ -92,6 +102,10 @@ class Plugin extends AbstractPlugin
                 $this->commandEvents['command.'.$command] = 'handleCommand';
                 $this->commandEvents['command.'.$command.'.help'] = 'helpCommand';
             }
+        }
+
+        if (isset($config['success-message'])) {
+            $this->successMessage = $config['success-message'];
         }
     }
 
@@ -146,6 +160,7 @@ class Plugin extends AbstractPlugin
         } else {
             $this->database->postMessage($event->getNick(), $params[0],
                 implode(' ', array_slice($params, 1)));
+            $queue->ircNotice($event->getNick(), $this->successMessage);
         }
     }
 
