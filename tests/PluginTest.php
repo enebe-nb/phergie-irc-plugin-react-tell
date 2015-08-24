@@ -84,6 +84,19 @@ class PluginTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
+     * Tests if the database is correctly created
+     */
+    public function testCreateDatabase()
+    {
+        if(isset(self::$database)) {
+            self::$database->exec('DROP TABLE IF EXISTS "phergie-plugin-tell";');
+            $this->instantiatePlugin(array('create-database' => true));
+            $this->assertNotFalse(self::$database->query(
+                'SELECT 1 FROM "phergie-plugin-tell"') );
+        }
+    }
+
+    /**
     * Data provider for testInvalidCommandParams().
     *
     * @return array

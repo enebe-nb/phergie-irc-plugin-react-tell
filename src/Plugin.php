@@ -50,7 +50,9 @@ class Plugin extends AbstractPlugin
      * custom-commands - optional, either a comma-delimited string or array of
      * commands to register listeners. Default: 'tell'
      *
-     * [TODO] create database option
+     * create-database - optional, call tables creation method on database.
+     * Default: false
+     *
      * [TODO] deliver on bot join
      * [TODO] max notes (avoid spam)
      * [TODO] message/date format
@@ -71,6 +73,9 @@ class Plugin extends AbstractPlugin
                 && $config['database'] instanceof \PDO) {
             // PDO database
             $this->database = new Db\PdoWrapper($config['database']);
+            if(isset($config['create-database']) && $config['create-database']) {
+                Db\PdoWrapper::create($config['database']);
+            }
 
         } else {
             // Not Supported Error

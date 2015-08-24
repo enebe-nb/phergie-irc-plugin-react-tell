@@ -34,6 +34,9 @@ return array(
             'custom-commands' => array('tell', 'ask', 'remind'),
             // also works with comma-delimited strings
             'custom-commands' => 'tell,ask,remind',
+
+            // create database table
+            'create-database' => true,
         )),
 
         // phergie/phergie-irc-plugin-react-command
