@@ -38,8 +38,11 @@ return array(
             // create database table
             'create-database' => true,
 
-            // reply received commands with a custom message
-            'success-message' => 'Gotcha!',
+            // set a maximum number of messages to be stored for an user
+            // Default: 10
+            'max-messages' => 20,
+            // or remove the maximum
+            'max-messages' => false,
         )),
 
         // phergie/phergie-irc-plugin-react-command
