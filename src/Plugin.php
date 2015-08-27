@@ -150,9 +150,12 @@ class Plugin extends AbstractPlugin
             $queue->ircNotice($event->getNick(), 'Can\'t identify nickname or message.');
             $this->helpMessages(array($queue, 'ircNotice'), $event->getNick(), $event->getCustomCommand());
         } else {
-            $this->database->postMessage($event->getNick(), $params[0],
-                implode(' ', array_slice($params, 1)));
-            $queue->ircNotice($event->getNick(), 'Ok. I\'ll tell him.');
+            $message = implode(' ', array_slice($params, 1));
+            if ($this->database->postMessage($event->getNick(), $params[0], $message)) {
+                $queue->ircNotice($event->getNick(), 'Ok, I\'ll tell him/her.');
+            } else {
+                $queue->ircNotice($event->getNick(), 'Sry, There\'s so many things to tell him/her.');
+            }
         }
     }
 
