@@ -164,7 +164,10 @@ class Plugin extends AbstractPlugin
      */
     public function helpCommand(CommandEventInterface $event, EventQueueInterface $queue)
     {
-        $this->helpMessages(array($queue, 'irc'.$event->getCommand()), $event->getSource(), $event->getCustomParams()[0]);
+        $command = strpos($event->getCustomCommand(), '.help') !== false
+            ? substr($event->getCustomCommand(), 0, -5)
+            : $event->getCustomParams()[0];
+        $this->helpMessages(array($queue, 'irc'.$event->getCommand()), $event->getSource(), $command);
     }
 
     /**
