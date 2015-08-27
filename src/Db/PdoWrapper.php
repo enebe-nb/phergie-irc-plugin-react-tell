@@ -87,7 +87,6 @@ class PdoWrapper implements WrapperInterface
                     WHERE "recipient" = ?;'
             )->execute(array($recipient));
 
-            // [NOTE] Maybe return statement (for iteration)
             return $messages;
         }
 
@@ -105,12 +104,13 @@ class PdoWrapper implements WrapperInterface
     public function postMessage($sender, $recipient, $message)
     {
         if ($this->maxMessages) {
-            $count = $this->connection->prepare(
+            $statement = $this->connection->prepare(
                 'SELECT COUNT(*) FROM "phergie-plugin-tell"
                     WHERE "recipient" = ?;'
-            )->execute(array($recipient))->fetchColumn(0);
+            );
+            $statement->execute(array($recipient));
 
-            if($count >= $this->maxMessages) {
+            if($statement->fetchColumn(0) >= $this->maxMessages) {
                 return false;
             }
         }
