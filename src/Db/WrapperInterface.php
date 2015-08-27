@@ -33,4 +33,18 @@ interface WrapperInterface
      * @return boolean true on success, false on failure
      */
     public function postMessage($sender, $recipient, $message);
+
+    /**
+     * Sets maximum messages stored per user
+     *
+     * @param integer $maxMessages
+     */
+     public function setMaxMessages($maxMessages);
+
+     /**
+      * Gets maximum messages stored per user
+      *
+      * @return integer
+      */
+     public function getMaxMessages();
 }

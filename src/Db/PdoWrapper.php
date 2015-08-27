@@ -25,6 +25,16 @@ class PdoWrapper implements WrapperInterface
      */
     private $connection;
 
+    /**
+     * Maximum messages stored per user
+     */
+    private $maxMessages = 10;
+
+    /**
+     * Creates a wrapper to handle PDO connection for Tell Plugin
+     *
+     * @param \PDO $connection
+     */
     public function __construct(\PDO $connection)
     {
         $this->connection = $connection;
@@ -94,10 +104,43 @@ class PdoWrapper implements WrapperInterface
      */
     public function postMessage($sender, $recipient, $message)
     {
-        return $this->connection->prepare(
+        if ($this->maxMessages) {
+            $count = $this->connection->prepare(
+                'SELECT COUNT(*) FROM "phergie-plugin-tell"
+                    WHERE "recipient" = ?;'
+            )->execute(array($recipient))->fetchColumn(0);
+
+            if($count >= $this->maxMessages) {
+                return false;
+            }
+        }
+
+        $this->connection->prepare(
             'INSERT INTO "phergie-plugin-tell"
                 ("sender", "recipient", "message")
                 VALUES (?, ?, ?);'
         )->execute(array($sender, $recipient, $message));
+
+        return true;
+    }
+
+    /**
+     * Sets maximum messages stored per user
+     *
+     * @param integer $maxMessages
+     */
+    public function setMaxMessages($maxMessages)
+    {
+        $this->maxMessages = $maxMessages;
+    }
+
+    /**
+     * Gets maximum messages stored per user
+     *
+     * @return integer
+     */
+    public function getMaxMessages()
+    {
+        return $this->maxMessages;
     }
 }

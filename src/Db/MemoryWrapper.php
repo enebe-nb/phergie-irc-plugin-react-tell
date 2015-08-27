@@ -18,7 +18,17 @@ use EnebeNb\Phergie\Plugin\Tell\Db\WrapperInterface;
  */
 class MemoryWrapper implements WrapperInterface
 {
+    /**
+     * Array object to store messages
+     *
+     * @var array
+     */
     private $database = array();
+
+    /**
+     * Maximum messages stored per user
+     */
+    private $maxMessages = 10;
 
     /**
      * Remove and returns messages for $recipient
@@ -50,6 +60,9 @@ class MemoryWrapper implements WrapperInterface
     {
         if (!isset($this->database[$recipient])) {
             $this->database[$recipient] = array();
+        } elseif ($this->maxMessages
+            && count($this->database[$recipient]) >= $this->maxMessages) {
+            return false;
         }
 
         $this->database[$recipient][] = array(
@@ -59,5 +72,25 @@ class MemoryWrapper implements WrapperInterface
         );
 
         return true;
+    }
+
+    /**
+     * Sets maximum messages stored per user
+     *
+     * @param integer $maxMessages
+     */
+    public function setMaxMessages($maxMessages)
+    {
+        $this->maxMessages = $maxMessages;
+    }
+
+    /**
+     * Gets maximum messages stored per user
+     *
+     * @return integer
+     */
+    public function getMaxMessages()
+    {
+        return $this->maxMessages;
     }
 }

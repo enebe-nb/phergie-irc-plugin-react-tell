@@ -53,8 +53,10 @@ class Plugin extends AbstractPlugin
      * create-database - optional, call tables creation method on database.
      * Default: false
      *
+     * max-messages - optional, maximum number of messages that can be stored
+     * for each recipient. Default: 10
+     *
      * [TODO] deliver on bot join
-     * [TODO] max notes (avoid spam)
      * [TODO] message/date format
      *
      * [NOTE] There's many concepts to add yet.
@@ -91,6 +93,10 @@ class Plugin extends AbstractPlugin
                 $this->commandEvents['command.'.$command] = 'handleCommand';
                 $this->commandEvents['command.'.$command.'.help'] = 'helpCommand';
             }
+        }
+
+        if (isset($config['max-messages'])) {
+            $this->database->setMaxMessages($config['max-messages']);
         }
     }
 
