@@ -179,7 +179,7 @@ class Plugin extends AbstractPlugin
      */
     private function helpMessages(callable $callback, $target, $command)
     {
-        call_user_func($callback, array($target, 'Usage: '.$command.' <nickname> <message>'));
-        call_user_func($callback, array($target, 'Stores a <message> to be send next time the <nickname> is seen.'));
+        call_user_func($callback, $target, 'Usage: '.$command.' <nickname> <message>');
+        call_user_func($callback, $target, 'Stores a <message> to be send next time the <nickname> is seen.');
     }
 }

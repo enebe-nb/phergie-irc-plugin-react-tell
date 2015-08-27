@@ -27,7 +27,7 @@ class PluginTest extends \PHPUnit_Framework_TestCase
      * (internal) Instantiate the Plugin object using current
      * envoirment database.
      */
-    private function instantiatePlugin($config)
+    private function instantiatePlugin($config = array())
     {
         if (isset(self::$database)) {
             return new Plugin(array_merge(array(
@@ -119,11 +119,11 @@ class PluginTest extends \PHPUnit_Framework_TestCase
      */
     public function testInvalidCommandParams($params)
     {
-        $plugin = Phake::partialMock('EnebeNb\Phergie\Plugin\Tell\Plugin');
+        $plugin = $this->instantiatePlugin();
         $queue = Phake::mock('\Phergie\Irc\Bot\React\EventQueueInterface');
         $commandEvent = $this->getMockCommandEvent('tell', $params, 'mynick');
         $plugin->handleCommand($commandEvent, $queue);
-        Phake::verify($plugin)->helpCommand($commandEvent, $queue,
+        Phake::verify($queue)->ircNotice($commandEvent->getNick(),
             'Can\'t identify nickname or message.');
     }
 
@@ -182,7 +182,7 @@ class PluginTest extends \PHPUnit_Framework_TestCase
             $commandEvent = $this->getMockCommandEvent('tell',
                 'myrecipient '.$message['content'], $message['sender']);
             $plugin->handleCommand($commandEvent, $queue);
-            Phake::verify($queue)->ircNotice($message['sender'], $this->anything());
+            Phake::verify($queue)->ircNotice($message['sender'], 'Ok, I\'ll tell him/her.');
         }
 
         $connection = $this->getMockConnection('mynickname');
@@ -211,7 +211,7 @@ class PluginTest extends \PHPUnit_Framework_TestCase
             $commandEvent = $this->getMockCommandEvent('tell',
                 'myrecipient '.$message['content'], $message['sender']);
             $plugin->handleCommand($commandEvent, $queue);
-            Phake::verify($queue)->ircNotice($message['sender'], $this->anything());
+            Phake::verify($queue)->ircNotice($message['sender'], 'Ok, I\'ll tell him/her.');
         }
 
         $connection = $this->getMockConnection('mynickname');
@@ -219,6 +219,63 @@ class PluginTest extends \PHPUnit_Framework_TestCase
         $plugin->deliverMessage($userEvent, $queue);
 
         Phake::verifyNoOtherInteractions($queue);
+    }
+
+    /**
+     * Data provider for testMaximumMessages
+     *
+     * @return array
+     */
+    public function dataProviderMaximumMessages()
+    {
+        return array(
+            // Default value '10'
+            array(
+                array(),
+                13,
+                10,
+            ),
+            // Custom value
+            array(
+                array('max-messages' => 5),
+                7,
+                5,
+            ),
+            // Disabled
+            array(
+                array('max-messages' => false),
+                17,
+                17,
+            ),
+        );
+    }
+
+    /**
+     * Tests maximum message params and responses
+     *
+     * @param array $config
+     * @param integer $testing
+     * @param integer $expected
+     * @dataProvider dataProviderMaximumMessages
+     */
+    public function testMaximumMessages(array $config, $testing, $expected)
+    {
+        $plugin = $this->instantiatePlugin($config);
+        $queue = Phake::mock('\Phergie\Irc\Bot\React\EventQueueInterface');
+        $commandEvent = $this->getMockCommandEvent('tell', 'myrecipient my message', 'mynick');
+        for($i = $testing; $i > 0; --$i){
+            $plugin->handleCommand($commandEvent, $queue);
+        }
+
+        Phake::verify($queue, Phake::times($testing - $expected))
+            ->ircNotice('mynick', 'Sry, There\'s so many things to tell him/her.');
+
+        $connection = $this->getMockConnection('mynickname');
+        $userEvent = $this->getMockUserEvent('myrecipient', $connection);
+        $plugin->deliverMessage($userEvent, $queue);
+
+        Phake::verify($queue, Phake::times($expected))
+            ->ircNotice('myrecipient', $this->stringContains('mynick: my message'));
     }
 
     /**
