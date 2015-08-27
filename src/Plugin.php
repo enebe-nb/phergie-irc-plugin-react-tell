@@ -59,8 +59,6 @@ class Plugin extends AbstractPlugin
      * [TODO] deliver on bot join
      * [TODO] message/date format
      *
-     * [NOTE] There's many concepts to add yet.
-     *
      * @param array $config
      * @throws \InvalidArgumentException if an unsupported database is passed.
      */
@@ -124,7 +122,6 @@ class Plugin extends AbstractPlugin
      */
     public function deliverMessage(UserEventInterface $event, EventQueueInterface $queue)
     {
-        // [NOTE] test response speed and study a count check before try retrieve the messages
         if($event->getNick() != $event->getConnection()->getNickname()) {
             $messages = $this->database->retrieveMessages($event->getNick());
             foreach($messages as $row) {
