@@ -7,8 +7,6 @@
 
 namespace EnebeNb\Phergie\Plugin\Tell\Db;
 
-use EnebeNb\Phergie\Plugin\Tell\Db\WrapperInterface;
-
 /**
  * Handles database communication in EnebeNb\Phergie\Plugin\Tell Plugin
  * using a PDO database as storage method.
@@ -79,18 +77,18 @@ class PdoWrapper implements WrapperInterface
                 WHERE "recipient" = ?;'
         );
 
-        if ($statement->execute(array($recipient))) {
+        if ($statement->execute([ $recipient ])) {
             $messages = $statement->fetchAll(\PDO::FETCH_ASSOC);
 
             $this->connection->prepare(
                 'DELETE FROM "phergie-plugin-tell"
                     WHERE "recipient" = ?;'
-            )->execute(array($recipient));
+            )->execute([ $recipient ]);
 
             return $messages;
         }
 
-        return array();
+        return [];
     }
 
     /**
@@ -108,9 +106,9 @@ class PdoWrapper implements WrapperInterface
                 'SELECT COUNT(*) FROM "phergie-plugin-tell"
                     WHERE "recipient" = ?;'
             );
-            $statement->execute(array($recipient));
+            $statement->execute([ $recipient ]);
 
-            if($statement->fetchColumn(0) >= $this->maxMessages) {
+            if ($statement->fetchColumn(0) >= $this->maxMessages) {
                 return false;
             }
         }
@@ -119,7 +117,7 @@ class PdoWrapper implements WrapperInterface
             'INSERT INTO "phergie-plugin-tell"
                 ("sender", "recipient", "message")
                 VALUES (?, ?, ?);'
-        )->execute(array($sender, $recipient, $message));
+        )->execute([ $sender, $recipient, $message ]);
 
         return true;
     }

@@ -11,7 +11,9 @@ use Phake;
 use EnebeNb\Phergie\Plugin\Tell\Plugin;
 use EnebeNb\Phergie\Plugin\Tell\Db;
 
-class InvalidClass {}
+class InvalidClass
+{
+}
 
 /**
  * Tests for the Plugin class.
@@ -27,12 +29,12 @@ class PluginTest extends \PHPUnit_Framework_TestCase
      * (internal) Instantiate the Plugin object using current
      * envoirment database.
      */
-    private function instantiatePlugin($config = array())
+    private function instantiatePlugin($config = [])
     {
         if (isset(self::$database)) {
-            return new Plugin(array_merge(array(
-                'database' =>  self::$database,
-            ), $config) );
+            return new Plugin(array_merge([
+                'database' => self::$database,
+            ], $config));
         } else {
             return new Plugin($config);
         }
@@ -48,10 +50,10 @@ class PluginTest extends \PHPUnit_Framework_TestCase
                 $GLOBALS['dburi'],
                 isset($GLOBALS['dbuser']) ? $GLOBALS['dbuser'] : null,
                 isset($GLOBALS['dbpass']) ? $GLOBALS['dbpass'] : null,
-                array(\PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION));
+                [ \PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION ]);
 
             // Set Session variables
-            new Plugin(array('database' => self::$database));
+            new Plugin([ 'database' => self::$database ]);
 
             Db\PdoWrapper::create(self::$database);
         }
@@ -75,7 +77,7 @@ class PluginTest extends \PHPUnit_Framework_TestCase
     public function testInvalidDatabase()
     {
         try {
-            $plugin = new Plugin(array('database' => new InvalidClass()));
+            $plugin = new Plugin([ 'database' => new InvalidClass() ]);
             $this->fail('Expected exception was not thrown');
         } catch (\InvalidArgumentException $e) {
             $this->assertSame('"EnebeNb\Phergie\Tests\Plugin\Tell\InvalidClass" '.
@@ -88,11 +90,11 @@ class PluginTest extends \PHPUnit_Framework_TestCase
      */
     public function testCreateDatabase()
     {
-        if(isset(self::$database)) {
+        if (isset(self::$database)) {
             self::$database->exec('DROP TABLE IF EXISTS "phergie-plugin-tell";');
-            $this->instantiatePlugin(array('create-database' => true));
+            $this->instantiatePlugin([ 'create-database' => true ]);
             $this->assertNotFalse(self::$database->query(
-                'SELECT 1 FROM "phergie-plugin-tell"') );
+                'SELECT 1 FROM "phergie-plugin-tell"'));
         }
     }
 
@@ -103,12 +105,12 @@ class PluginTest extends \PHPUnit_Framework_TestCase
      */
     public function dataProviderInvalidCommandParams()
     {
-        return array(
+        return [
             // None Params
-            array(''),
+            [ '' ],
             // Only nickname
-            array('myrecipient'),
-        );
+            [ 'myrecipient' ],
+        ];
     }
 
     /**
@@ -134,37 +136,37 @@ class PluginTest extends \PHPUnit_Framework_TestCase
      */
     public function dataProviderValidMessages()
     {
-        return array(
+        return [
             // No configuration, no messages
-            array(
-                array(),
-                array(),
-            ),
+            [
+                [],
+                [],
+            ],
             // No configuration, messages with spaces
-            array(
-                array(),
-                array(
-                    array(
+            [
+                [],
+                [
+                    [
                         'sender' => 'mynick',
-                        'content' => 'My long message is cool'
-                    )
-                ),
-            ),
+                        'content' => 'My long message is cool',
+                    ],
+                ],
+            ],
             // No configuration, multiple messages
-            array(
-                array(),
-                array(
-                    array(
+            [
+                [],
+                [
+                    [
                         'sender' => 'mynick',
-                        'content' => 'MessageOne'
-                    ),
-                    array(
+                        'content' => 'MessageOne',
+                    ],
+                    [
                         'sender' => 'hernick',
-                        'content' => 'Message Two'
-                    ),
-                ),
-            ),
-        );
+                        'content' => 'Message Two',
+                    ],
+                ],
+            ],
+        ];
     }
 
     /**
@@ -228,26 +230,26 @@ class PluginTest extends \PHPUnit_Framework_TestCase
      */
     public function dataProviderMaximumMessages()
     {
-        return array(
+        return [
             // Default value '10'
-            array(
-                array(),
+            [
+                [],
                 13,
                 10,
-            ),
+            ],
             // Custom value
-            array(
-                array('max-messages' => 5),
+            [
+                [ 'max-messages' => 5 ],
                 7,
                 5,
-            ),
+            ],
             // Disabled
-            array(
-                array('max-messages' => false),
+            [
+                [ 'max-messages' => false ],
                 17,
                 17,
-            ),
-        );
+            ],
+        ];
     }
 
     /**
@@ -263,7 +265,7 @@ class PluginTest extends \PHPUnit_Framework_TestCase
         $plugin = $this->instantiatePlugin($config);
         $queue = Phake::mock('\Phergie\Irc\Bot\React\EventQueueInterface');
         $commandEvent = $this->getMockCommandEvent('tell', 'myrecipient my message', 'mynick');
-        for($i = $testing; $i > 0; --$i){
+        for ($i = $testing; $i > 0; --$i) {
             $plugin->handleCommand($commandEvent, $queue);
         }
 
@@ -285,52 +287,52 @@ class PluginTest extends \PHPUnit_Framework_TestCase
      */
     public function dataProviderGetSubscribedEvents()
     {
-        return array(
+        return [
             // Empty configuration
-            array(
-                array(),
-                array(
+            [
+                [],
+                [
                     'irc.received.join' => 'deliverMessage',
                     'irc.received.privmsg' => 'deliverMessage',
                     'command.tell' => 'handleCommand',
                     'command.tell.help' => 'helpCommand',
-                ),
-            ),
+                ],
+            ],
             // Single command configuration
-            array(
-                array('custom-commands' =>'remind'),
-                array(
+            [
+                [ 'custom-commands' =>'remind' ],
+                [
                     'irc.received.join' => 'deliverMessage',
                     'irc.received.privmsg' => 'deliverMessage',
                     'command.remind' => 'handleCommand',
                     'command.remind.help' => 'helpCommand',
-                ),
-            ),
+                ],
+            ],
             // Array command configuration
-            array(
-                array('custom-commands' => array('tell', 'remind')),
-                array(
+            [
+                [ 'custom-commands' => [ 'tell', 'remind' ] ],
+                [
                     'irc.received.join' => 'deliverMessage',
                     'irc.received.privmsg' => 'deliverMessage',
                     'command.tell' => 'handleCommand',
                     'command.tell.help' => 'helpCommand',
                     'command.remind' => 'handleCommand',
                     'command.remind.help' => 'helpCommand',
-                ),
-            ),
+                ],
+            ],
             // Comma-delimited command configuration
-            array(
-                array('custom-commands' => 'tell,remind'),
-                array(
+            [
+                [ 'custom-commands' => 'tell,remind' ],
+                [
                     'irc.received.join' => 'deliverMessage',
                     'irc.received.privmsg' => 'deliverMessage',
                     'command.tell' => 'handleCommand',
                     'command.tell.help' => 'helpCommand',
                     'command.remind' => 'handleCommand',
                     'command.remind.help' => 'helpCommand',
-                ),
-            ),
-        );
+                ],
+            ],
+        ];
     }
 
     /**
@@ -372,7 +374,7 @@ class PluginTest extends \PHPUnit_Framework_TestCase
         Phake::when($mock)->getNick()->thenReturn($nickname);
         Phake::when($mock)->getCommand()->thenReturn('Privmsg');
         Phake::when($mock)->getCustomCommand()->thenReturn($command);
-        Phake::when($mock)->getCustomParams()->thenReturn(explode(' ',$paramString));
+        Phake::when($mock)->getCustomParams()->thenReturn(explode(' ', $paramString));
         return $mock;
     }
 

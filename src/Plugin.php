@@ -12,8 +12,6 @@ use Phergie\Irc\Bot\React\EventQueueInterface;
 use Phergie\Irc\Event\UserEventInterface;
 use Phergie\Irc\Plugin\React\Command\CommandEventInterface;
 
-use EnebeNb\Phergie\Plugin\Tell\Db;
-
 /**
  * Plugin for send messages to users next time they are seen.
  *
@@ -27,10 +25,10 @@ class Plugin extends AbstractPlugin
      *
      * @var array
      */
-    protected $commandEvents = array(
+    protected $commandEvents = [
             'command.tell' => 'handleCommand',
             'command.tell.help' => 'helpCommand',
-        );
+        ];
 
     /**
      * Database layer interface
@@ -62,20 +60,18 @@ class Plugin extends AbstractPlugin
      * @param array $config
      * @throws \InvalidArgumentException if an unsupported database is passed.
      */
-    public function __construct(array $config = array())
+    public function __construct(array $config = [])
     {
         if (!isset($config['database']) || !$config['database']) {
             // Memory database
             $this->database = new Db\MemoryWrapper();
-
         } elseif (class_exists('PDO', false)    // Avoid autload class
                 && $config['database'] instanceof \PDO) {
             // PDO database
             $this->database = new Db\PdoWrapper($config['database']);
-            if(isset($config['create-database']) && $config['create-database']) {
+            if (isset($config['create-database']) && $config['create-database']) {
                 Db\PdoWrapper::create($config['database']);
             }
-
         } else {
             // Not Supported Error
             throw new \InvalidArgumentException('"'.get_class($config['database']).
@@ -86,8 +82,8 @@ class Plugin extends AbstractPlugin
             $commands = is_string($config['custom-commands'])
                 ? explode(',', $config['custom-commands'])
                 : $config['custom-commands'];
-            $this->commandEvents = array();
-            foreach($commands as $command) {
+            $this->commandEvents = [];
+            foreach ($commands as $command) {
                 $this->commandEvents['command.'.$command] = 'handleCommand';
                 $this->commandEvents['command.'.$command.'.help'] = 'helpCommand';
             }
@@ -106,10 +102,10 @@ class Plugin extends AbstractPlugin
     public function getSubscribedEvents()
     {
         return array_merge(
-            array(
+            [
                 'irc.received.join' => 'deliverMessage',
                 'irc.received.privmsg' => 'deliverMessage',
-            ),
+            ],
             $this->commandEvents
          );
     }
@@ -122,9 +118,9 @@ class Plugin extends AbstractPlugin
      */
     public function deliverMessage(UserEventInterface $event, EventQueueInterface $queue)
     {
-        if($event->getNick() != $event->getConnection()->getNickname()) {
+        if ($event->getNick() != $event->getConnection()->getNickname()) {
             $messages = $this->database->retrieveMessages($event->getNick());
-            foreach($messages as $row) {
+            foreach ($messages as $row) {
                 $message = sprintf('(%s) %s: %s',
                     (new \DateTime($row['timestamp']))->format('m/d h:ia'),
                     $row['sender'],
@@ -145,7 +141,7 @@ class Plugin extends AbstractPlugin
         $params = $event->getCustomParams();
         if (count($params) < 2) {
             $queue->ircNotice($event->getNick(), 'Can\'t identify nickname or message.');
-            $this->helpMessages(array($queue, 'ircNotice'), $event->getNick(), $event->getCustomCommand());
+            $this->helpMessages([ $queue, 'ircNotice' ], $event->getNick(), $event->getCustomCommand());
         } else {
             $message = implode(' ', array_slice($params, 1));
             if ($this->database->postMessage($event->getNick(), $params[0], $message)) {
@@ -167,7 +163,7 @@ class Plugin extends AbstractPlugin
         $command = strpos($event->getCustomCommand(), '.help') !== false
             ? substr($event->getCustomCommand(), 0, -5)
             : $event->getCustomParams()[0];
-        $this->helpMessages(array($queue, 'irc'.$event->getCommand()), $event->getSource(), $command);
+        $this->helpMessages([ $queue, 'irc'.$event->getCommand() ], $event->getSource(), $command);
     }
 
     /**

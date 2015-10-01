@@ -7,8 +7,6 @@
 
 namespace EnebeNb\Phergie\Plugin\Tell\Db;
 
-use EnebeNb\Phergie\Plugin\Tell\Db\WrapperInterface;
-
 /**
  * Handles database communication in EnebeNb\Phergie\Plugin\Tell Plugin
  * using memory as storage method.
@@ -23,7 +21,7 @@ class MemoryWrapper implements WrapperInterface
      *
      * @var array
      */
-    private $database = array();
+    private $database = [];
 
     /**
      * Maximum messages stored per user
@@ -39,7 +37,7 @@ class MemoryWrapper implements WrapperInterface
     public function retrieveMessages($recipient)
     {
         if (!isset($this->database[$recipient])) {
-            return array();
+            return [];
         }
 
         $messages = $this->database[$recipient];
@@ -59,17 +57,17 @@ class MemoryWrapper implements WrapperInterface
     public function postMessage($sender, $recipient, $message)
     {
         if (!isset($this->database[$recipient])) {
-            $this->database[$recipient] = array();
+            $this->database[$recipient] = [];
         } elseif ($this->maxMessages
             && count($this->database[$recipient]) >= $this->maxMessages) {
             return false;
         }
 
-        $this->database[$recipient][] = array(
+        $this->database[$recipient][] = [
             'timestamp' => date('Y-m-d H:i:s'),
             'sender' => $sender,
             'message' => $message,
-        );
+        ];
 
         return true;
     }
